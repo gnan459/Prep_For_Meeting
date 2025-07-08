@@ -1,0 +1,20 @@
+crewai==0.11.0
+
+# LangChain stack pinned to compatible versions
+langchain==0.1.20
+langchain-core==0.1.52
+langchain-community==0.0.38
+langchain-openai==0.0.2.post1
+langsmith==0.1.18
+
+# Gemini support
+langchain-google-genai==0.0.11
+google-generativeai==0.4.1
+protobuf>=3.19.5,<5.0.0
+
+# Exa
+langchain-exa==0.0.1
+exa_py==1.0.7
+
+# Environment support
+python-dotenv==1.0.1
