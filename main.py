@@ -28,11 +28,11 @@ industry_analysis = tasks.industry_analysis_task(industry_analyst_agent, partici
 meeting_strategy = tasks.meeting_strategy_task(meeting_strategy_agent, context, objective)
 summary_and_briefing = tasks.summary_and_briefing_task(summary_and_briefing_agent, context, objective)
 
-# Set context dependencies
+# ✅ Set dependencies BEFORE initializing the crew
 meeting_strategy.context = [research, industry_analysis]
 summary_and_briefing.context = [research, industry_analysis, meeting_strategy]
 
-# Initialize and run Crew
+# Create and run Crew
 crew = Crew(
     agents=[researcher_agent, industry_analyst_agent, meeting_strategy_agent, summary_and_briefing_agent],
     tasks=[research, industry_analysis, meeting_strategy, summary_and_briefing]
@@ -40,10 +40,11 @@ crew = Crew(
 
 result = crew.kickoff()
 
-# Print results
+# Final Output
 print("\n\n################################################")
 print("## Here is the result")
 print("################################################\n")
+
 if result:
     print(result)
 else:

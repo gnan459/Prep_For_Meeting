@@ -4,20 +4,32 @@ from crewai import Task
 class MeetingPreparationTasks():
     def research_task(self, agent, participants, context):
         return Task(
-            description=dedent(f"""\
-                Conduct comprehensive research on each of the individuals and companies
-                involved in the upcoming meeting. Gather information on recent news,
-                achievements, professional background, and any relevant business activities.
+            description=dedent(f"""
+        Use the SerperSearch tool to find LinkedIn information for each participant.
 
-                Participants: {participants}
-                Meeting Context: {context}
+        Query format: `LinkedIn <name>`
+
+        Expected JSON per person:
+        - name
+        - linkedin
+        - snippet (1–2 if possible)
+
+        DO NOT generate content. Only return actual search results as a list of JSON objects.
+        """),
+            expected_output=dedent("""
+            Return a list of JSON objects. For each participant:
+            {
+            "name": "Full Name",
+            "linkedin_url": "https://...",
+            "snippets": [
+                "Result snippet 1",
+                "Result snippet 2"
+            ]
+            }
             """),
-            expected_output=dedent("""\
-                A detailed report summarizing key findings about each participant
-                and company, highlighting information that could be relevant for the meeting.
-            """),
-            async_execution=True,  # Can be done in parallel
-            agent=agent
+            async_execution=False,  # Can be done in parallel
+            agent=agent,
+            output_json=True
         )
 
     def industry_analysis_task(self, agent, participants, context):
@@ -35,8 +47,9 @@ class MeetingPreparationTasks():
                 An insightful analysis that identifies major trends, potential
                 challenges, and strategic opportunities.
             """),
-            async_execution=True,  # Can also run in parallel
-            agent=agent
+            async_execution=False,  # Can also run in parallel
+            agent=agent,
+            output_json=True
         )
 
     def meeting_strategy_task(self, agent, context, objective):
@@ -53,7 +66,8 @@ class MeetingPreparationTasks():
                 and proposed angles to achieve the meeting's objective.
             """),
             async_execution=False,  # Depends on prior tasks
-            agent=agent
+            agent=agent,
+            output_json=True
         )
 
     def summary_and_briefing_task(self, agent, context, objective):
@@ -63,17 +77,21 @@ class MeetingPreparationTasks():
                 talking points into a concise, comprehensive briefing document for
                 the meeting. Ensure the briefing is easy to digest and equips
                 participants with all necessary information and strategies.
+                               
+                If the Participant Bios contain only snippets and a LinkedIn URL, 
+                do NOT generate summaries or descriptions. Only list the name, the snippet, and the LinkedIn URL.
 
                 Meeting Context: {context}
                 Meeting Objective: {objective}
             """),
             expected_output=dedent("""\
-                A well-structured briefing document that includes sections for:
-                - Participant bios
-                - Industry overview
-                - Talking points
-                - Strategic recommendations
+            A well-structured briefing document that includes:
+            - Participant bios (based on retrieved LinkedIn URLs and snippets)
+            - Industry overview
+            - Talking points
+            - Strategic recommendations
             """),
             async_execution=False,  # Should run last
-            agent=agent
+            agent=agent,
+            output_json=True
         )

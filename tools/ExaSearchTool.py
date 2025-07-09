@@ -1,4 +1,5 @@
 # tools/ExaSearchTool.py
+
 import os
 from exa_py import Exa
 from langchain.agents import Tool  # For crewai v0.11.0
@@ -6,17 +7,50 @@ from langchain.agents import Tool  # For crewai v0.11.0
 exa = Exa(api_key=os.environ["EXA_API_KEY"])
 
 def search(query: str):
-    return exa.search(f"{query}", use_autoprompt=True, num_results=3)
+    try:
+        raw_results = exa.search(query, use_autoprompt=True, num_results=3)
+
+        cleaned_results = []
+        for r in raw_results.results:
+            cleaned_results.append({
+                "id": getattr(r, "id", ""),
+                "title": getattr(r, "title", ""),
+                "url": getattr(r, "url", ""),
+                "text": getattr(r, "text", "")
+            })
+
+        return {"results": cleaned_results}
+
+    except Exception as e:
+        return {"results": [], "error": str(e)}
 
 def find_similar(url: str):
-    return exa.find_similar(url, num_results=3)
+    try:
+        return exa.find_similar(url, num_results=3)
+    except Exception as e:
+        return {"results": [], "error": str(e)}
 
 def get_contents(ids: str):
-    ids = eval(ids)
-    contents = str(exa.get_contents(ids))
-    contents = contents.split("URL:")
-    contents = [content[:1000] for content in contents]
-    return "\n\n".join(contents)
+    try:
+        # Convert from string to list if needed
+        if isinstance(ids, str):
+            ids = eval(ids)
+
+        results = exa.get_contents(ids)
+
+        contents = []
+        for r in results:
+            if hasattr(r, "text"):
+                contents.append(r.text[:1000])
+            elif isinstance(r, dict) and "text" in r:
+                contents.append(r["text"][:1000])
+            else:
+                contents.append(str(r)[:1000])  # fallback
+
+        return "\n\n".join(contents)
+
+    except Exception as e:
+        return f"⚠️ Error fetching contents: {e}"
 
 def get_exa_tools():
     return [
