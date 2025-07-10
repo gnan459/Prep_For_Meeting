@@ -18,3 +18,6 @@ exa_py==1.0.7
 
 # Environment support
 python-dotenv==1.0.1
+
+# Streamlit for web UI
+streamlit>=1.28.0
