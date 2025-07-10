@@ -5,27 +5,30 @@ class MeetingPreparationTasks():
     def research_task(self, agent, participants, context):
         return Task(
             description=dedent(f"""
-        Use the SerperSearch tool to find LinkedIn information for each participant.
+                Use the SerperSearch tool to find LinkedIn profiles for the following participants:
+                {participants}
 
-        Query format: `LinkedIn <name>`
-
-        Expected JSON per person:
-        - name
-        - linkedin
-        - snippet (1–2 if possible)
-
-        DO NOT generate content. Only return actual search results as a list of JSON objects.
-        """),
+                For each participant:
+                - Search using: "LinkedIn <participant_name>"
+                - Ensure the query includes: `site:linkedin.com/in`
+                - Only return structured output from the search results. Do not summarize or infer content.
+                - Your job is to extract:
+                  • Name
+                  • Top 1–2 snippet summaries (if present)
+                  • LinkedIn profile URL (if available)
+                - Do NOT fabricate or guess URLs. Only return LinkedIn links that appear in search results.
+                Return the results exactly as found in the search JSON.
+            """),
             expected_output=dedent("""
-            Return a list of JSON objects. For each participant:
-            {
-            "name": "Full Name",
-            "linkedin_url": "https://...",
-            "snippets": [
-                "Result snippet 1",
-                "Result snippet 2"
-            ]
-            }
+                Output JSON format:
+                [
+                  {
+                    "name": "Participant Name",
+                    "linkedin_url": "<URL or null>",
+                    "snippets": ["Snippet 1", "Snippet 2"]
+                  },
+                  ...
+                ]
             """),
             async_execution=False,  # Can be done in parallel
             agent=agent,
